@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Sign up page(feat. MySQL, NodeJS)</title>
+    </head>
+
+    <body>
+        <h1>사용자 등록 페이지</h1>
+        <br />
+    <!-- form: 서버에게 http request 명령을 보내는 명령어 
+    post : GET 보다 더 보안성이 있음.
+    action ="~~" : ~~~로 보내라
+    -->
+        <form action="/process/login" method="post">
+            <table>
+                <tr>
+                <td><label>아이디</label></td>
+                <td><input type="text" name="id" /></td>    <!-- name: key-->
+                </tr>
+            
+                <tr>
+                <td><label>패스워드</label></td>
+                <td><input type="password" name="password" /></td>
+                </tr>
+            </table>
+            
+            <input type="submit" value="로그인">
+        </form>
+    </body>
+</html>

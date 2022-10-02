@@ -1,0 +1,56 @@
+<!-- <!DOCTYPE html> -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Image Database Node</title>
+  </head>
+
+  <body>
+    <div>
+        <canvas id="my_canvas" width="800" height="700"></canvas>
+    </div>
+    <div>
+      <select name="동물" id="animal">
+        <option value="none" id="none">===선택===</option>
+        <option value="1" id = "dog">개</option>
+        <option value="2" id="cat">고양이</option>
+      </select>
+      <button id="btn">선택</button>
+    </div>
+  </body>
+
+  <script src="/scripts/script.js" defer></script>
+
+  <!-- <script>
+    const my_canvas = document.getElementById('my_canvas');
+    const ctx = my_canvas.getContext('2d');
+
+    console.log('fetch 시작');
+
+    const response = fetch('/getimgfromdb',{
+        method : 'post',
+        headers : {
+            'content-type':'application/json'
+        }
+    }).then((res)=>res.json())
+    .then(async (res)=>{
+
+      console.log('asdasd');
+
+        // unsigned int 8바이트 배열
+        const binary = new Uint8Array(res['result'][0]['img']['data']);
+        const blob = new Blob([binary], {type:'image/jpeg'});
+        const kimg = new Image();
+
+        kimg.src = URL.createObjectURL(blob);
+
+        const imgLoadingDone = await kimg.decode();
+
+        ctx.drawImage(kimg, 0, 0);
+        
+    })
+
+  </script> -->
+</html>
