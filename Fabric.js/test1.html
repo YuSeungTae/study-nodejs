@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
+    <title>Fabricjs 테스트</title>
+  </head>
+
+  <body>
+    <div>
+        <canvas id="c" width="500" height="500" tabindex="1"></canvas>
+    </div>
+
+    <script>
+        // canvas id
+        const canvas = new fabric.Canvas('c');
+
+        // 이미지를 불러서 background로 설정
+        fabric.Image.fromURL('dog.jpg',(img)=>{
+          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas),{
+            scaleX: canvas.width/img.width,
+            scaleY: canvas.height/img.height
+          })
+        })
+
+
+        let isDown = false;   // 마우스가 눌렸는지 확인하기 위한 변수
+        let ox, oy;           // 
+        let rect;
+
+
+        // 마우스 클릭되었을 때의 event 처리
+        canvas.on('mouse:down',(o)=>{
+            
+            // 클릭한곳에 무언가가 있을 경우
+            if(o.target){
+              return;
+            }
+
+            isDown = true;
+
+            const pointer = canvas.getPointer(o.e); // 캔버스 위의 마우스의 좌표
+            ox=pointer.x;
+            oy=pointer.y;
+            
+            rect = new fabric.Rect({
+              originX:'left', // 사각형의 좌상단의 x좌표가 left
+              originY:'top',  // 사각형의 좌상단이 y좌표가 top
+              left:ox,
+              top:oy,
+              width: pointer.x - ox,
+              height:pointer.y - oy,
+              angle:0,  // 사각형이 옆으로 돌아가느냐
+              fill:'rgba(255,0,0,0.5)', // a: 1이면 불투명 0.5면 반투명 0이면 투명
+              tranparentConners:false   // 테두리는 불투명하게
+
+            })
+            canvas.add(rect);
+
+        })
+
+
+        // move와 드래그를 구분하지는 못함.
+        canvas.on('mouse:move',(o)=>{
+
+          if(!isDown){
+            return;
+          }
+          // 드래그 상태일 때만, 사각형 크기 조절
+          const pointer = canvas.getPointer(o.e);
+
+          if(ox>pointer.x){
+            rect.set({
+              left:pointer.x
+            })
+          }
+
+          if(oy>pointer.y){
+            rect.set({
+              top:pointer.y
+            })
+          }
+
+
+          rect.set({
+            width: Math.abs(ox - pointer.x), //  음수일수도 있기 때문에, 절댓값으로
+            height: Math.abs(oy-pointer.y)
+          })
+
+          canvas.renderAll();
+        })
+
+        // 마우스 클릭 떼기
+        canvas.on('mouse:up',(o)=>{
+          isDown = false;
+        })
+
+
+        
+        
+
+        // 사각형
+        // const rect = new fabric.Rect({
+        //     left: 100,  // 좌상단 에서 x좌표로 100만큼 이동
+        //     top: 100,   // 좌상단 에서 y좌표로 100만큼 이동
+        //     width: 20,
+        //     height: 20,
+        //     fill: 'red'
+        // })
+
+        // const brect = new fabric.Rect({
+        //     left: 300,  // 좌상단 에서 x좌표로 100만큼 이동
+        //     top: 300,   // 좌상단 에서 y좌표로 100만큼 이동
+        //     width: 20,
+        //     height: 20,
+        //     fill: 'blue'
+        // })
+
+        // canvas.add(rect);
+        // canvas.add(brect);
+
+    </script>
+  </body>
+</html>
