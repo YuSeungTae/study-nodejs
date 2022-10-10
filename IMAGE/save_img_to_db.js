@@ -23,7 +23,7 @@ const cat = {
 };
 
 
-const query = connection.query('insert into animals set ?', cat, 
+const query = connection.query('insert into animals2 set ?', dog, 
     (err, result)=>{
         if(err){
             console.dir(err);

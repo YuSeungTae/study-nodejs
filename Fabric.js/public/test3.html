@@ -5,27 +5,63 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
-    <title>Fabricjs 테스트</title>
+    <title>Fabricjs Database 테스트</title>
   </head>
 
   <body>
+    
     <div>
+        <label for="">이미지 이름</label>
+        <input type="text" id="imgname">
+        <button id="loadbtn">가져오기</button>
+        <button id="savebtn">저장하기</button>
         <canvas id="c" width="500" height="500" tabindex="1"></canvas>
     </div>
-    <div>
-      <button id="savebtn">저장</button>
-    </div>
-
+    
     <script>
         // canvas id
         const canvas = new fabric.Canvas('c');
 
-        // 이미지를 불러서 background로 설정
-        fabric.Image.fromURL('dog.jpg',(img)=>{
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas),{
-            scaleX: canvas.width/img.width,
-            scaleY: canvas.height/img.height
-          })
+        document.getElementById('loadbtn').addEventListener('click',async()=>{
+            console.log(`가져올 이미지: ${document.getElementById('imgname').value}`)
+
+            const response = await fetch('/getimgfromdbbyname',{
+                method: 'POST',
+                headers :{
+                    'Content-Type' : 'application/json'
+                },
+                body :JSON.stringify({
+                    imgname: document.getElementById('imgname').value
+                })
+            })
+            if(response.ok){
+              const res = await response.json();
+              const status = res['status'];
+
+              if(status ==='ok'){
+                // 이미지를 받아서, canvas에 그려준다.
+                const imgdata = res['rows'][0]['img']['data']
+                const binary = new Uint8Array(imgdata);
+                const blob = new Blob([binary], {type: 'image/jpeg'});
+                const kimg = new Image();
+                kimg.src = URL.createObjectURL(blob);
+                await kimg.decode();
+                canvas.clear();
+                fabric.Image.fromObject(kimg, (img)=>{
+                  canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas),{
+                    scaleX: canvas.width / img.width,
+                    scaleY: canvas.height / img.height
+                  })
+            
+                })
+
+              }
+              else{
+                alert(`에러발생: ${status}`);
+                return;
+              }
+            }
+
         })
 
 
@@ -118,15 +154,43 @@
           }
         }
 
-        document.getElementById('savebtn').addEventListener('click',()=>{
+        document.getElementById('savebtn').addEventListener('click',async ()=>{
           const objects = canvas.getObjects('rect')
-          objects.forEach((object) => {
-            console.log(`BBOX 정보: ${Object.keys(object)}`)
-            console.log(`left :${object.left} top: ${object.top} width: ${object.width} height: ${object.height}`)
 
-    
+          const coords = [];
+          objects.forEach((object) => {
+            console.log(`left :${object.left} top: ${object.top} width: ${object.width} height: ${object.height}`)
+            coords.push(`${object.left} ${object.top} ${object.width} ${object.height}`);
           });
-          fetch
+          console.log(coords);
+
+          const data_to_be_stored ={
+            imgname: document.getElementById('imgname').value,
+            coords: coords.join('\n')  // 각각의 배열을 인수로 구분하여 붙임.
+          }
+
+          console.log(`imgname is: ${data_to_be_stored.imgname}`);
+          console.log(data_to_be_stored.coords);
+
+          const response = await fetch('/saveBbox',{
+            method: 'POST',
+            headers:{
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data_to_be_stored)
+          })
+
+          if(response.ok){
+
+            const res= await response.json()
+            if(res.status=='ok'){
+              alert('DB에 저장 성공');
+              return;
+            } 
+            alert('DB에 저장 실패');
+              
+
+          }
 
         })
 
@@ -134,25 +198,7 @@
         
         
 
-        // 사각형
-        // const rect = new fabric.Rect({
-        //     left: 100,  // 좌상단 에서 x좌표로 100만큼 이동
-        //     top: 100,   // 좌상단 에서 y좌표로 100만큼 이동
-        //     width: 20,
-        //     height: 20,
-        //     fill: 'red'
-        // })
-
-        // const brect = new fabric.Rect({
-        //     left: 300,  // 좌상단 에서 x좌표로 100만큼 이동
-        //     top: 300,   // 좌상단 에서 y좌표로 100만큼 이동
-        //     width: 20,
-        //     height: 20,
-        //     fill: 'blue'
-        // })
-
-        // canvas.add(rect);
-        // canvas.add(brect);
+      
 
     </script>
   </body>
